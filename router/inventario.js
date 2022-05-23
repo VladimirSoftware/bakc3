@@ -37,7 +37,7 @@ router.post('/', async function(req, res) {
            return res.status(400).send('Serial ya existe');
        }
 
-       inventario = new Inventario(); //new Inventario(req.body);
+       inventario = new Inventario(); //new Iñlnklnnventario(req.body);
        inventario.serial = req.body.serial;
        inventario.modelo = req.body.modelo;
        inventario.descripcion = req.body.descripcion;
