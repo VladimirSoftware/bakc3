@@ -6,10 +6,10 @@ const { validarUser } = require('../helpers/validaruser');
 router.post('/', async function(req, res){
     try {
         const validaciones = validarUser(req);
-        if (validarUser.length > 0){
+        if (validaciones.length > 0){
             return res.status(400).send(validaciones);
         }
-        console.log('Objeto recibido', req.body);
+        
         const existeUsuario = await Usuario.findOne({ email: req.body.email });
         console.log('Respuesta existe usuario', existeUsuario);
         if (existeUsuario) {

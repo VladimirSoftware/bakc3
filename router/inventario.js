@@ -26,10 +26,10 @@ router.get('/', async function(req, res) {
 router.post('/', async function(req, res) {
     try {
         const validaciones = validarInventario(req);
-        if (validarInventario.length > 0){
+        if (validaciones.length > 0){
             return res.status(400).send(validaciones);
         }
-        console.log(req.body);
+        
         // select * from inventario; lista
         // select * from inventario where serial = ? limit 1
        let inventario = await Inventario.findOne({ serial: req.body.serial });

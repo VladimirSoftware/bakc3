@@ -6,10 +6,9 @@ const { validarMarca } = require('../helpers/validarmarca');
 router.post('/', async function(req, res) {
     try {
         const validaciones = validarMarca(req);
-        if (validarMarca.length > 0){
+        if (validaciones.length > 0){
             return res.status(400).send(validaciones);
         }
-        console.log(req.body);
         
         let marca = await Marca.findOne({ nombre: req.body.nombre });
         if (marca) {
