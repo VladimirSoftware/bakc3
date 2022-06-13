@@ -62,6 +62,11 @@ router.post('/', async function(req, res) {
 // PUT http://localhost:3000/inventario 
 router.put('/:inventarioId', async function(req, res) {
     try {
+        const validaciones = validarInventario(req);
+        if (validaciones.length > 0){
+            return res.status(400).send(validaciones);
+        }
+
         console.log(req.body, req.params.inventarioId);
        
         let inventario = await Inventario.findById(req.params.inventarioId);
@@ -94,6 +99,20 @@ router.put('/:inventarioId', async function(req, res) {
     } catch (error) {
        console.log(error);
        res.status(500).send('Ocurrio un error en servidor');
+    }
+});
+
+router.get('/:inventarioId', async function(req, res) {
+    try {
+        
+       const inventario = await Inventario.findById (req.params.inventarioId);
+       if (!inventario) {
+           return res.status(400).send('Inventario no existe');
+       }
+       res.send(inventario);
+    } catch (error) {
+       console.log(error);
+       res.status(500).send('Ocurrio un error al consultar Inventario');
     }
 });
 

@@ -1,18 +1,26 @@
 const { Router } = require('express');
+const { validationResult, check } = require('express-validator');
 const router = Router();
 const Marca = require('../models/Marca');
-const { validarMarca } = require('../helpers/validarmarca');
 
-router.post('/', async function(req, res) {
+
+router.post('/',
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('estado', 'estado.require').isIn(['Activo', 'Inactivo']),
+],
+async function(req, res) {
     try {
-        const validaciones = validarMarca(req);
-        if (validaciones.length > 0){
-            return res.status(400).send(validaciones);
-        }
+        console.log(req.body);
         
         let marca = await Marca.findOne({ nombre: req.body.nombre });
         if (marca) {
             return res.status(400).send('Marca ya existe');
+        }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
         
         marca = new Marca();
@@ -42,13 +50,23 @@ router.get('/', async function(req, res) {
 });
 
 // PUT http://localhost:3000/marca 
-router.put('/:marcaId', async function(req, res) {
+router.put('/:marcaId',
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('estado', 'estado.require').isIn(['Activo', 'Inactivo']),
+],
+
+async function(req, res) {
     try {
         console.log(req.body, req.params.marcaId);
        
         let marca = await Marca.findById(req.params.marcaId);
         if (!marca) {
             return res.status(400).send('Marca no existe');
+        }
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
 
        marca.nombre = req.body.nombre;

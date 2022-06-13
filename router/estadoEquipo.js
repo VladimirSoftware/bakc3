@@ -1,14 +1,25 @@
 const { Router } = require('express');
+const { validationResult, check } = require('express-validator');
 const router = Router();
 const EstadoEquipo = require('../models/EstadoEquipo');
 
-router.post('/', async function(req, res) {
+router.post('/',
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('estado', 'estado.require').not().isEmpty(),
+],
+
+async function(req, res) {
     try {
         console.log(req.body);
         
         let estadoEquipo = await EstadoEquipo.findOne({ nombre: req.body.nombre });
         if (estadoEquipo) {
             return res.status(400).send('Estado ya existe');
+        }
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
         
         estadoEquipo = new EstadoEquipo();
@@ -38,13 +49,24 @@ router.get('/', async function(req, res) {
 });
 
 // PUT http://localhost:3000/estado-equipo 
-router.put('/:estadoEquipoId', async function(req, res) {
+router.put('/:estadoEquipoId',
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('estado', 'estado.require').isIn(['Activo', 'Inactivo']),
+],
+
+async function(req, res) {
     try {
         console.log(req.body, req.params.estadoEquipoId);
        
         let estadoEquipo = await EstadoEquipo.findById(req.params.estadoEquipoId);
         if (!estadoEquipo) {
             return res.status(400).send('Estado no existe');
+        }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
 
        estadoEquipo.nombre = req.body.nombre;

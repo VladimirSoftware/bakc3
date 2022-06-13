@@ -1,20 +1,30 @@
 const { Router } = require('express');
+const { validationResult, check } = require('express-validator');
 const router = Router();
 const Usuario = require('../models/Usuario');
-const { validarUser } = require('../helpers/validaruser');
 
-router.post('/', async function(req, res){
+router.post('/',
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('email', 'email.require').isEmail(),
+    check('estado', 'estado.require').isIn(['Activo', 'Inactivo']),
+],
+
+async function(req, res){
     try {
-        const validaciones = validarUser(req);
-        if (validaciones.length > 0){
-            return res.status(400).send(validaciones);
-        }
+        console.log(req.body);
         
         const existeUsuario = await Usuario.findOne({ email: req.body.email });
         console.log('Respuesta existe usuario', existeUsuario);
         if (existeUsuario) {
             return res.status(400).send('Email ya existe');
         }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
+        }
+
     let usuario = new Usuario();
     usuario.nombre = req.body.nombre;
     usuario.email = req.body.email;
@@ -44,13 +54,25 @@ router.get('/', async function(req, res) {
 });
 
 // PUT http://localhost:3000/usuario 
-router.put('/:usuarioId', async function(req, res) {
+router.put('/:usuarioId',
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('email', 'email.require').isEmail(),
+    check('estado', 'estado.require').isIn(['Activo', 'Inactivo']),
+],
+
+async function(req, res) {
     try {
         console.log(req.body, req.params.usuarioId);
        
         let usuario = await Usuario.findById(req.params.usuarioId);
         if (!usuario) {
             return res.status(400).send('Usuario no existe');
+        }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
 
         usuario.nombre = req.body.nombre;
@@ -65,6 +87,7 @@ router.put('/:usuarioId', async function(req, res) {
        res.status(500).send('Ocurrio un error en servidor');
     }
 });
+
 
 
 module.exports = router;

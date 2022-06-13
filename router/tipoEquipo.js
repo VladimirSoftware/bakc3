@@ -1,14 +1,25 @@
 const { Router } = require('express');
+const { validationResult, check } = require('express-validator');
 const router = Router();
 const TipoEquipo = require('../models/TipoEquipo');
 
-router.post('/', async function(req, res) {
+router.post('/', 
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('estado', 'estado.require').not().isEmpty(),
+],
+async function(req, res) {
     try {
         console.log(req.body);
         
         let tipoEquipo = await TipoEquipo.findOne({ nombre: req.body.nombre });
         if (tipoEquipo) {
             return res.status(400).send('Tipo ya existe');
+        }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
         
         tipoEquipo = new TipoEquipo();
@@ -38,13 +49,23 @@ router.get('/', async function(req, res) {
 });
 
 // PUT http://localhost:3000/tipoEquipo 
-router.put('/:tipoEquipoId', async function(req, res) {
+router.put('/:tipoEquipoId', 
+[
+    check('nombre', 'nombre.require').not().isEmpty(),
+    check('estado', 'estado.require').isIn(['Activo', 'Inactivo']),
+],
+async function(req, res) {
     try {
         console.log(req.body, req.params.tipoEquipoId);
        
         let tipoEquipo = await TipoEquipo.findById(req.params.tipoEquipoId);
         if (!tipoEquipo) {
             return res.status(400).send('Tipo no existe');
+        }
+
+        const errors = validationResult(req);
+        if (!errors.isEmpty()) {
+            return res.status(400).json({ messages: errors.array() });
         }
 
        tipoEquipo.nombre = req.body.nombre;
